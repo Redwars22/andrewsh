@@ -4,10 +4,6 @@ import "fmt"
 import "log"
 import "ioutil"
 
-func AndrewSH() {
-	fmt.Print("andrew $: ")
-}
-
 func main() {
 	loadConfigs()
 
