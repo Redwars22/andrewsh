@@ -44,6 +44,9 @@ func readAndInterpret() {
 				fmt.Println("Error:", err)
 				return
 			}
+			return
 		}
 	}
+
+	return
 }
