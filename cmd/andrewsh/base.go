@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"bufio"
+	"runtime"
 )
 
 func readAndInterpret() {
@@ -20,31 +21,41 @@ func readAndInterpret() {
 			continue
 		}
 
-		cmd := exec.Command(args[0], args[1:]...)
-
 		switch args[0] {
-		case "exit":
-			return
-		case "cd":
-			if len(args) < 2 {
-				fmt.Println("Error: Directory argument is missing.")
-				continue
-			}
-			err := os.Chdir(args[1])
-			if err != nil {
-				fmt.Println("Error:", err)
-			}
-			return
-		default:
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			err := cmd.Run()
-			if err != nil {
-				fmt.Println("Error:", err)
+			case "exit":
 				return
-			}
-			return
+			case "cd":
+				if len(args) < 2 {
+					fmt.Println("Error: Directory argument is missing.")
+					continue
+				}
+				
+				err := changeDirectory(args[1])
+				if err != nil {
+					fmt.Println("Error:", err)
+				}
+			default:
+				var cmd *exec.Cmd
+
+				if runtime.GOOS == "windows" {
+					cmdString := strings.Join(args, " ")
+					cmd = exec.Command("cmd", "/c", cmdString)
+				} else {
+					cmd = exec.Command(args[0], args[1:]...)
+				}
+
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+
+				err := cmd.Start()
+
+				if err != nil {
+					fmt.Println("Error:", err)
+				}
+
+				cmd.Wait()
+
+				return
 		}
 	}
 
